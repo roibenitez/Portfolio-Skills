@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capacidad 2028 · Simulador · Learning Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111;--body:#2A2A2E;--grey:#6E6D6A;--cite:#9B9A97;--violet:#5743CB;--violet2:#4A2FE0;--orange:#DCA456;--orange-d:#9A6A22;--lilac:#E8E4FD;--card:#F4F4F6;--peach:#F8E6D0;--line:#E2E0EA;--ok:#2E7D5B}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--body);font-family:Lato,Calibri,Arial,sans-serif;font-size:15px;line-height:1.45}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:16px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:5}
+.brand{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.brand b{color:var(--ink)}
+.top .sp{flex:1}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--violet);background:var(--lilac);padding:4px 12px;border-radius:999px;font-size:14px}
+.timer small{font-weight:400;color:var(--body);margin-left:6px}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 28px 80px}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);margin:0 0 6px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;color:var(--ink);font-weight:900}
+h1 em{color:var(--orange);font-style:italic}
+h2{font-size:19px;margin:0 0 8px;color:var(--ink)}
+h3{font-size:15px;margin:0 0 4px;color:var(--ink)}
+.lead{font-size:16px;max-width:760px;margin:6px 0 20px}
+.muted{color:var(--grey)} .small{font-size:13px} .tiny{font-size:11.5px;color:var(--cite)}
+.steps{display:flex;gap:6px;margin:0 0 26px;flex-wrap:wrap}
+.step{font-size:12.5px;padding:5px 12px;border-radius:999px;background:var(--card);color:var(--grey)}
+.step.on{background:var(--violet);color:#fff;font-weight:700}
+.step.done{background:var(--lilac);color:var(--violet)}
+.card{background:var(--card);border-radius:12px;padding:18px 20px}
+.card.l{background:var(--lilac)} .card.p{background:var(--peach);border:1px solid var(--orange)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}.wrap{padding:20px 16px 80px}.top{padding:12px 16px}}
+.btn{border:0;border-radius:999px;padding:11px 22px;font-weight:700;background:var(--violet);color:#fff}
+.btn:disabled{background:#C9C7D6;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--violet);border:1.5px solid var(--violet)}
+.btn.sm{padding:7px 14px;font-size:13px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 10px;border-radius:999px;background:#fff;color:var(--violet)}
+/* sala picker */
+.salas{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media (max-width:820px){.salas{grid-template-columns:1fr 1fr}}
+.sala{border:2px solid transparent;background:var(--card);border-radius:12px;padding:16px;text-align:left}
+.sala b{display:block;color:var(--violet);font-size:13px}
+.sala span{color:var(--ink);font-weight:700}
+.sala.sel{border-color:var(--violet);background:var(--lilac)}
+input[type=text],textarea{width:100%;font-family:inherit;font-size:15px;padding:10px 12px;border:1px solid #CFCDDA;border-radius:8px;background:#fff;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+label.f{display:block;font-weight:700;color:var(--ink);margin:16px 0 6px;font-size:14px}
+/* tasks & board */
+.tray{display:flex;flex-wrap:wrap;gap:8px;min-height:46px;padding:10px;border:1.5px dashed #CFCDDA;border-radius:12px;margin-bottom:16px}
+.chip{border:1.5px solid #D6D4E0;background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;color:var(--ink);user-select:none}
+.chip.sel{border-color:var(--violet);background:var(--violet);color:#fff}
+.board{display:grid;grid-template-columns:28px 1fr 1fr;grid-template-rows:1fr 1fr 28px;gap:10px}
+.quad{border-radius:12px;padding:14px;min-height:150px;border:2px solid transparent;transition:border-color .15s}
+.quad.hot{border-color:var(--violet)}
+.quad h3{font-size:16px}
+.quad .d{font-size:12.5px;color:var(--grey);margin-bottom:8px}
+.quad .chips{display:flex;flex-wrap:wrap;gap:6px}
+.q-P{background:var(--peach);border-color:var(--orange)} .q-E{background:var(--lilac)} .q-R,.q-D{background:var(--card)}
+.q-P.hot,.q-E.hot,.q-R.hot,.q-D.hot{border-color:var(--violet)}
+.yax{grid-row:1/3;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font-size:11px;letter-spacing:.06em;color:var(--grey);font-weight:700}
+.xax{grid-column:2/4;text-align:center;font-size:11px;letter-spacing:.06em;color:var(--grey);font-weight:700;display:flex;justify-content:space-between}
+.xax span:nth-child(2){font-weight:700}
+.hint{font-size:13px;color:var(--grey);margin:0 0 10px}
+/* skills */
+.skill{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;width:100%}
+.skill.sel{border-color:var(--violet);background:var(--lilac)}
+.skill .nm{font-weight:700;color:var(--ink)}
+.gap{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.gap i{width:8px;height:8px;border-radius:50%;background:#DDDBE6;display:inline-block}
+.gap i.on{background:var(--orange)}
+.tq{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;margin:3px 4px 0 0;background:var(--card);color:var(--body)}
+.tq.P{background:var(--peach);color:var(--orange-d)} .tq.E{background:var(--lilac);color:var(--violet)}
+.chk{width:20px;height:20px;border-radius:6px;border:2px solid #C9C7D6;flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
+.sel .chk{background:var(--violet);border-color:var(--violet)}
+/* invest */
+.xcard{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:120px}
+.xcard.sel{border-color:var(--violet);background:var(--lilac)}
+.xcard .cost{font-size:12.5px;color:var(--grey)}
+.xcard .cost b{color:var(--violet)}
+.meter{height:10px;background:var(--card);border-radius:999px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--violet);border-radius:999px;transition:width .2s}
+.meter.over i{background:#C0392B}
+.copilot{background:#14121F;color:#EDEBF7;border-radius:14px;padding:18px 20px}
+.copilot h3{color:#fff;display:flex;align-items:center;gap:8px}
+.copilot .dot{width:9px;height:9px;border-radius:50%;background:#8FE3B5;display:inline-block}
+.copilot .txt{font-size:14px;white-space:pre-wrap;min-height:90px}
+.copilot .conf{font-size:12px;color:#B8B3D6;margin-top:8px}
+.copilot .btn{background:#8FE3B5;color:#14121F}
+/* measure */
+.chain{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 18px}
+.chain span{font-size:12.5px;padding:4px 10px;border-radius:8px;background:var(--card)}
+.chain b{color:var(--grey)}
+/* results */
+.bar{display:grid;grid-template-columns:170px 1fr 48px;align-items:center;gap:12px;margin:10px 0}
+.bar .t{height:16px;background:var(--card);border-radius:999px;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:999px}
+.bar .v{font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
+.ind{display:grid;grid-template-columns:1fr 1.1fr;gap:18px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.il{font-weight:700;color:var(--ink)} .lv{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--violet);background:var(--lilac);padding:2px 8px;border-radius:999px;margin-left:6px}
+.id{font-size:13px;color:var(--grey)}
+.bar2{display:grid;grid-template-columns:1fr 70px;gap:12px;align-items:center}
+.bar2 .t{height:14px;background:#E6E5EC;border-radius:999px;overflow:hidden;display:block}
+.bar2 .t i{display:block;height:100%;border-radius:999px}
+.bar2 .v{font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;font-size:18px;text-align:right}
+.bar2 .v small{font-size:11px;color:var(--grey);font-weight:400}
+@media (max-width:820px){.ind{grid-template-columns:1fr}}
+.event{background:#14121F;color:#fff;border-radius:14px;padding:20px 22px}
+.event .kicker{color:#B8B3D6}
+.ins{margin:0;padding-left:18px} .ins li{margin:6px 0}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;word-break:break-all;max-height:110px;overflow:auto}
+.ok{color:var(--ok);font-weight:700}
+/* dashboard */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:14px;background:var(--card);border-radius:999px;padding:6px 12px;border:0}
+.switch .k{width:30px;height:18px;border-radius:999px;background:#C9C7D6;position:relative;transition:background .15s}
+.switch .k::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}
+.switch.on .k{background:var(--violet)} .switch.on .k::after{left:14px}
+.gcard{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:8px 0}
+.mini div{border-radius:6px;padding:4px 6px;font-size:11.5px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--card);margin:2px 3px 0 0}
+.tag.v{background:var(--lilac);color:var(--violet)} .tag.o{background:var(--peach);color:var(--orange-d)}
+table.at{border-collapse:collapse;width:100%;font-size:13.5px}
+table.at th,table.at td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.at th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--grey)}
+.big{font-size:44px;font-weight:900;color:var(--violet);font-variant-numeric:tabular-nums;line-height:1}
+.notice{background:var(--lilac);color:var(--violet);border-radius:10px;padding:10px 14px;font-size:13.5px}
+.err{background:var(--peach);color:var(--orange-d)}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--grey);margin:6px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><b>UdeSA · Learning Design</b> · Clase 7 · De Skill a Portfolio</div>
+  <div class="sp"></div>
+  <div id="timerBox"></div>
+  <a href="#docente" id="toDoc" class="small muted" style="text-decoration:none">Vista docente</a>
+  <a href="#" id="toGroup" class="small muted hidden" style="text-decoration:none">Vista de grupo</a>
+</div>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ======================= CONFIGURACIÓN =======================
+   endpoint: URL de la aplicación web de Google Apps Script (termina en /exec).
+   clase: identificador de la cohorte; separa los resultados de cada edición. */
+const CONFIG = {
+  endpoint: 'https://script.google.com/macros/s/AKfycbwZMdafip6P8psnEjU_OoEOMjiOP9pWEu3pV_gxQpJMtqkNUgOgNPLuZg1uD45-q_fo1A/exec',
+  clase: 'LD2026-C7'
+};
+/* ======================= DATOS ======================= */
+const QUADS = {
+  P:{n:'Proteger', d:'Forma criterio y la IA no la resuelve bien. Práctica humana deliberada.', cls:'q-P'},
+  E:{n:'Entrenar con IA', d:'La IA la resuelve bien, pero forma criterio. IA como tutor o simulador, nunca como atajo.', cls:'q-E'},
+  R:{n:'Rediseñar', d:'Ni forma criterio ni la IA la resuelve bien. ¿Hace falta?', cls:'q-R'},
+  D:{n:'Delegar', d:'La IA la resuelve bien y no es formativa. Automatizar y supervisar.', cls:'q-D'}
+};
+// ai: la IA la resuelve bien (dentro de la frontera) · f: forma criterio · s: índices de skills
+const ROLES = [
+ {id:1, rol:'Analista de crédito pyme', adj:'Oficial de negocios de sucursal', adjS:[1,3,4],
+  skills:[['Lectura de estados contables',1],['Juicio de riesgo crediticio',3],['Verificación de resultados de IA',3],['Negociación con clientes',1],['Comunicación de malas noticias',2],['Redacción técnica',1]],
+  tasks:[['Resumir el legajo de la empresa',1,0,[0]],['Cargar datos en el sistema',1,0,[]],['Verificar el resumen que hizo la IA',0,1,[2,0]],['Detectar señales de riesgo en los estados contables',1,1,[0,1]],
+         ['Evaluar una solicitud atípica',0,1,[1]],['Negociar condiciones con el cliente',0,1,[3]],['Explicarle un rechazo al cliente',1,1,[4]],['Redactar el informe de crédito',1,1,[5,1]]]},
+ {id:2, rol:'Oficial de negocios de sucursal', adj:'Analista de crédito pyme', adjS:[2,4,5],
+  skills:[['Asesoramiento financiero',2],['Lectura de necesidades del cliente',2],['Juicio de riesgo crediticio',2],['Uso crítico de IA',3],['Negociación',1],['Comunicación de malas noticias',2]],
+  tasks:[['Preparar la propuesta comercial estándar',1,0,[0]],['Agendar y registrar visitas',1,0,[]],['Entender qué necesita una pyme en una visita',0,1,[1]],['Recomendar el producto adecuado',1,1,[0,1,3]],
+         ['Detectar si una operación es riesgosa',1,1,[2,3]],['Negociar tasa y condiciones',0,1,[4]],['Comunicar un rechazo de crédito',1,1,[5]],['Cargar el mismo dato en tres sistemas',0,0,[]]]},
+ {id:3, rol:'Agente de atención al cliente', adj:'Analista de prevención de fraude', adjS:[2,3],
+  skills:[['Escucha y empatía',1],['Conocimiento de productos',1],['Resolución de problemas complejos',3],['Verificación de respuestas de IA',3],['Manejo de reclamos',2],['Comunicación escrita',1]],
+  tasks:[['Responder consultas frecuentes',1,0,[1]],['Resumir el historial del cliente',1,0,[]],['Contener a un cliente enojado',0,1,[0,4]],['Resolver un caso que no está en el manual',0,1,[2]],
+         ['Revisar la respuesta sugerida por la IA',0,1,[3,1]],['Explicar un producto complejo',1,1,[1,5]],['Redactar la respuesta a un reclamo formal',1,1,[4,5]],['Transcribir llamadas a mano para auditoría',0,0,[]]]},
+ {id:4, rol:'Analista de prevención de fraude', adj:'Agente de atención al cliente', adjS:[3,4],
+  skills:[['Análisis de patrones',1],['Juicio investigativo',3],['Normativa y cumplimiento',1],['Verificación de alertas de IA',3],['Comunicación con otras áreas',1],['Pensamiento adversarial',2]],
+  tasks:[['Filtrar alertas de bajo riesgo',1,0,[0]],['Armar el legajo de la investigación',1,0,[]],['Investigar un patrón nuevo de fraude',0,1,[1,5]],['Decidir si bloquear una cuenta',0,1,[1,2]],
+         ['Revisar los falsos positivos del modelo',0,1,[3]],['Interpretar un cambio normativo',1,1,[2]],['Explicar un caso a otras áreas',1,1,[4]],['Copiar alertas en una planilla paralela',0,0,[]]]},
+ {id:5, rol:'Líder de equipo de operaciones', adj:'Coordinación de mejora continua', adjS:[1,3,5],
+  skills:[['Dar feedback',2],['Diseñar el trabajo con IA',3],['Desarrollar criterio en otros',3],['Priorización',1],['Gestión del cambio',2],['Lectura de indicadores',1]],
+  tasks:[['Armar el reporte semanal de indicadores',1,0,[5]],['Asignar casos según la carga',1,0,[3]],['Dar feedback sobre un error grave',0,1,[0]],['Acompañar a alguien nuevo en un caso difícil',0,1,[2]],
+         ['Decidir qué tareas pasan a la IA',0,1,[1]],['Preparar una conversación difícil',1,1,[0,4]],['Analizar por qué subieron los errores',1,1,[5,1]],['Aprobar a mano cada excepción menor',0,0,[]]]}
+];
+const CARDS = [
+ {k:'elearning', n:'Curso e-learning con certificado', pts:10, h:6, perf:4, cap:3, res:1, act:'Exposición; poca recuperación; escala alta'},
+ {k:'copiloto', n:'Copiloto de IA libre en el puesto', pts:10, h:0, perf:25, cap:-10, res:-10, act:'Desempeño inmediato alto; poco aprendizaje sin resguardos'},
+ {k:'tutor', n:'Tutor de IA socrático (no da respuestas)', pts:20, h:8, perf:6, cap:12, res:6, act:'Recuperación y feedback'},
+ {k:'simulador', n:'Simulador de IA con casos y clientes', pts:25, h:8, perf:6, cap:12, res:12, act:'Práctica variada con feedback; transferencia'},
+ {k:'microcasos', n:'Microcasos semanales de recuperación espaciada', pts:10, h:6, perf:3, cap:10, res:5, act:'Retención'},
+ {k:'mentoria', n:'Mentoría y shadowing con una persona experta', pts:25, h:10, perf:4, cap:12, res:14, act:'Criterio tácito y feedback experto; poca escala'},
+ {k:'proyecto', n:'Proyecto real con desafío y revisión', pts:20, h:16, perf:4, cap:12, res:10, act:'Aplicación y transferencia'},
+ {k:'comunidad', n:'Comunidad de práctica', pts:10, h:6, perf:4, cap:5, res:5, act:'Aprendizaje social'}
+];
+const MEASURES = [
+ {k:'fin', n:'Porcentaje de finalización', link:'Experiencia', v:0},
+ {k:'sat', n:'Satisfacción de participantes', link:'Experiencia', v:0},
+ {k:'quiz', n:'Cuestionario al final del curso', link:'Aprendizaje', v:1},
+ {k:'sinred', n:'Desempeño en un caso nuevo, sin IA, a los 60 días', link:'Aplicación', v:3},
+ {k:'obs', n:'Observación del líder con rúbrica', link:'Aplicación', v:2},
+ {k:'auto', n:'Tiempo hasta la autonomía', link:'Aplicación', v:2},
+ {k:'err', n:'Tasa de error en casos complejos', link:'Resultado', v:3},
+ {k:'aud', n:'Auditoría de verificación de resultados de IA', link:'Aplicación', v:2}
+];
+const BUDGET = 100, HOURS = 40;
+const REC = {cards:['copiloto','elearning','comunidad'], meas:['fin','sat']};
+const EVENT = 'Marzo de 2028. El proveedor de IA falla durante dos semanas y una crisis en un sector exportador trae una ola de pedidos de refinanciación atípicos.';
+const ROUNDS = [[0,2,'Caso'],[2,7,'Descomponer'],[7,10,'Priorizar'],[10,17,'Invertir'],[17,20,'Medir'],[20,22,'Revelación, reflexión y guardado']];
+
+const trueQ = t => t[1] ? (t[2] ? 'E' : 'D') : (t[2] ? 'P' : 'R');
+function trueCritical(role){
+  const sc = role.skills.map((s,i)=>{ let n=0; role.tasks.forEach(t=>{ if(t[2] && t[3].includes(i)) n++; }); return [i, s[1]*2+n]; });
+  return sc.sort((a,b)=>b[1]-a[1] || a[0]-b[0]).slice(0,3).map(x=>x[0]);
+}
+
+/* ======================= MODELO DE PUNTAJE ======================= */
+function score(st){
+  const role = ROLES[st.sala-1];
+  let perf=40, cap=15, res=25; const notes=[];
+  let fDel=0, nP=0, nE=0;
+  role.tasks.forEach((t,i)=>{
+    const q = st.place[i], tq = trueQ(t), ai=!!t[1], f=!!t[2];
+    if(q==='P') nP++; if(q==='E') nE++;
+    if(f && q==='D'){ cap-=6; res-=5; perf+=3; fDel++; }
+    if(f && (q==='P'||q==='E')){ cap+=1; if(q===tq){cap+=1; res+=1;} }
+    if(!f && q==='D' && ai) perf+=4;
+    if(!f && q==='P') perf-=3;
+    if(tq==='R' && q==='R') perf+=4;
+    if(tq==='R' && q!=='R') perf-=1;
+    if(!ai && q==='D'){ res-=6; perf-=2; }
+  });
+  const has = k => st.cards.includes(k);
+  st.cards.forEach(k=>{ const c=CARDS.find(x=>x.k===k); perf+=c.perf; cap+=c.cap; res+=c.res; });
+  const practice = ['mentoria','simulador','proyecto','microcasos'].some(has);
+  if(nP>0 && !practice){ res-=15; cap-=5; }
+  if(nE>0 && !(has('tutor')||has('simulador'))) cap-=8;
+  if(has('copiloto') && !(has('tutor')||has('simulador'))) cap-=8;
+  const tc = trueCritical(role);
+  st.crit.forEach(i=>{ cap += tc.includes(i) ? 3 : -2; });
+  const vis = Math.round(st.meas.reduce((a,k)=>a+MEASURES.find(m=>m.k===k).v,0)/6*100);
+  const cl = x=>Math.max(0,Math.min(100,Math.round(x)));
+  perf=cl(perf); cap=cl(cap); res=cl(res);
+  // lectura
+  if(has('copiloto') && !has('tutor') && !has('simulador')) notes.push('Eligieron el copiloto libre sin una experiencia que proteja el esfuerzo: el desempeño sube rápido, pero la capacidad queda atrás.');
+  if(nP>0 && !practice) notes.push('Marcaron tareas para proteger, pero ninguna carta da práctica humana con feedback. Ante el evento, el equipo no tiene de dónde sacar criterio.');
+  if(fDel>0) notes.push(`Delegaron ${fDel} ${fDel===1?'tarea que forma':'tareas que forman'} criterio. Quien entra al rol ya no la${fDel===1?'':'s'} practica.`);
+  if(perf-cap>=20) notes.push('Brecha visible: alto desempeño a tres meses, poca capacidad a doce.');
+  if(vis<50) notes.push('Sus evidencias miden sobre todo actividad: no distinguirían desempeño de capacidad.');
+  else notes.push('Sus evidencias miden aplicación: verían la diferencia entre desempeño y capacidad.');
+  if(!notes.length) notes.push('Cartera equilibrada para este rol.');
+  return {perf,cap,res,vis,notes,fDel};
+}
+function copilotDecision(st){
+  const sameC = REC.cards.length===st.cards.length && REC.cards.every(k=>st.cards.includes(k));
+  const sameM = REC.meas.every(k=>st.meas.includes(k)) && st.meas.length===2;
+  const overlap = REC.cards.filter(k=>st.cards.includes(k)).length;
+  if(st.copApplied && sameC && sameM) return 'aceptada';
+  if(st.copApplied || overlap>=2) return 'modificada';
+  return 'rechazada';
+}
+
+/* ======================= CÓDIGO DE ENVÍO ======================= */
+const Q4 = 'PERD';
+function encode(sub){
+  const a=[2, sub.sala, (sub.grupo||'').slice(0,40), sub.place.join(''), sub.crit.join(''),
+    CARDS.reduce((m,c,i)=>m|(sub.cards.includes(c.k)?1<<i:0),0),
+    sub.meas.map(k=>MEASURES.findIndex(m=>m.k===k)).join(''), sub.cop[0], (sub.strategy||'').slice(0,160), sub.ts, (sub.refl||[]).map(x=>(x||'').slice(0,200))];
+  return 'C28-' + btoa(unescape(encodeURIComponent(JSON.stringify(a))));
+}
+function decode(code){
+  const raw = code.trim().replace(/^C28-/,'');
+  const a = JSON.parse(decodeURIComponent(escape(atob(raw))));
+  if(a[0]!==2) throw new Error('versión');
+  const sub = {sala:+a[1], grupo:a[2], place:a[3].split(''), crit:a[4].split('').map(Number),
+    cards:CARDS.filter((c,i)=>a[5]&(1<<i)).map(c=>c.k), meas:a[6].split('').map(i=>MEASURES[+i].k),
+    cop:{a:'aceptada',m:'modificada',r:'rechazada'}[a[7]], strategy:a[8], ts:a[9], refl:Array.isArray(a[10])?a[10]:[]};
+  if(!(sub.sala>=1&&sub.sala<=5) || sub.place.length!==8) throw new Error('formato');
+  sub.id = 's'+sub.sala+'-'+sub.ts;
+  return sub;
+}
+
+/* ======================= UTILIDADES ======================= */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = s=>{ s=Math.max(0,Math.floor(s)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+function store(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function load(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+
+let DB = null;
+(async()=>{ try{ if(window.claude && claude.use){ DB = await claude.use('db'); if(route()==='docente') subscribe(); } }catch(e){ DB=null; } })();
+
+/* ======================= VISTA DE GRUPO ======================= */
+const STEPS = ['Caso','Descomponer','Priorizar','Invertir','Medir','Resultado'];
+let G = load('c28-group', null) || fresh();
+function fresh(){ return {view:'start', sala:0, grupo:'', place:Array(8).fill(''), crit:[], strategy:'', cards:[], meas:[], copApplied:false, copShown:false, t0:0, sent:false, code:'', ts:0, refl:['','','']}; }
+function save(){ store('c28-group', G); }
+let selTask = null;
+
+function stepper(i){
+  return '<div class="steps">'+STEPS.map((s,j)=>`<span class="step ${j===i?'on':j<i?'done':''}">${j+1} · ${s}</span>`).join('')+'</div>';
+}
+function groupTimer(){
+  const box=$('#timerBox');
+  if(route()==='docente'){ box.innerHTML=''; return; }
+  if(!G.t0 || G.view==='start'){ box.innerHTML=''; return; }
+  const m=(Date.now()-G.t0)/60000;
+  const r=ROUNDS.find(x=>m>=x[0]&&m<x[1]);
+  box.innerHTML=`<span class="timer">${fmt((Date.now()-G.t0)/1000)}<small>${r?'sugerido: '+r[2]:'tiempo cumplido'}</small></span>`;
+}
+setInterval(groupTimer,1000);
+
+function renderGroup(){
+  const app=$('#app'); const role = G.sala?ROLES[G.sala-1]:null;
+  if(G.view==='start'){
+    app.innerHTML = `
+      <p class="kicker">Acto V · Simulador</p>
+      <h1>Capacidad 2028: <em>Banco Aleph</em></h1>
+      <p class="lead">Es marzo de 2026. Banco Aleph, un banco regional ficticio, ya usa IA para resumir legajos de crédito, precalificar solicitudes y responder consultas simples. Los tiempos bajaron, pero los errores en casos complejos subieron y quienes ingresan no ganan criterio. La dirección les pide un portfolio de 12 meses para un rol.</p>
+      <h2>¿En qué sala están?</h2>
+      <div class="salas">${ROLES.map(r=>`<button class="sala ${G.sala===r.id?'sel':''}" data-s="${r.id}"><b>Sala ${r.id}</b><span>${r.rol}</span></button>`).join('')}</div>
+      <label class="f" for="gname">Nombre del grupo (opcional)</label>
+      <input type="text" id="gname" maxlength="40" placeholder="Ej.: Sala 3, grupo de Ana" value="${esc(G.grupo)}">
+      <div class="nav"><span class="small muted">Una persona comparte pantalla. Tienen 22 minutos.</span><button class="btn" id="go" ${G.sala?'':'disabled'}>Empezar</button></div>`;
+    app.querySelectorAll('.sala').forEach(b=>b.onclick=()=>{ G.sala=+b.dataset.s; save(); renderGroup(); });
+    $('#gname').oninput=e=>{ G.grupo=e.target.value; save(); };
+    $('#go').onclick=()=>{ G.view='caso'; G.t0=Date.now(); save(); renderGroup(); };
+  }
+  else if(G.view==='caso'){
+    app.innerHTML = stepper(0)+`
+      <p class="kicker">Sala ${role.id} · Banco Aleph</p>
+      <h1>${esc(role.rol)}</h1>
+      <div class="grid g2" style="margin-top:16px">
+        <div class="card"><h2>La situación</h2>
+          <p>Banco Aleph ya usa IA para resumir legajos de crédito, precalificar solicitudes y responder consultas simples. Los tiempos bajaron, pero los errores en casos complejos subieron y quienes ingresan no ganan criterio.</p>
+          <p>La dirección les pide un portfolio de 12 meses para este rol. Tienen <b>${BUDGET} puntos</b> de presupuesto y <b>${HOURS} horas por persona</b>.</p>
+          <p style="margin-bottom:0"><b style="color:var(--violet)">No hay una respuesta correcta. Hay apuestas que se pueden defender.</b></p></div>
+        <div class="card l"><h2>Las ocho tareas del rol</h2>
+          <ol style="margin:0;padding-left:20px">${role.tasks.map(t=>`<li>${esc(t[0])}</li>`).join('')}</ol></div>
+      </div>
+      <div class="nav"><button class="btn ghost" id="back">Volver</button><button class="btn" id="next">Descomponer el rol</button></div>`;
+    $('#back').onclick=()=>{ G.view='start'; save(); renderGroup(); };
+    $('#next').onclick=()=>{ G.view='desc'; save(); renderGroup(); };
+  }
+  else if(G.view==='desc'){
+    const unplaced = role.tasks.map((t,i)=>i).filter(i=>!G.place[i]);
+    const chip = i=>`<span class="chip ${selTask===i?'sel':''}" draggable="true" data-t="${i}" role="button" tabindex="0">${esc(role.tasks[i][0])}</span>`;
+    const quad = q=>`<div class="quad ${QUADS[q].cls}" data-q="${q}"><h3>${QUADS[q].n}</h3><div class="d">${QUADS[q].d}</div><div class="chips">${role.tasks.map((t,i)=>i).filter(i=>G.place[i]===q).map(chip).join('')}</div></div>`;
+    app.innerHTML = stepper(1)+`
+      <p class="kicker">Ronda 1 · 5 minutos</p>
+      <h1>Ubiquen cada tarea: <em>¿qué delegar, qué entrenar, qué proteger?</em></h1>
+      <p class="hint">Tocá una tarea y después un cuadrante (o arrastrala). Para moverla, tocala de nuevo. Dos preguntas: ¿la IA la resuelve bien? ¿Forma el criterio que el rol necesita?</p>
+      <div class="tray" data-q="">${unplaced.length?unplaced.map(chip).join(''):'<span class="small muted">Todas las tareas están ubicadas.</span>'}</div>
+      <div class="board">
+        <div class="yax">¿LA TAREA FORMA CRITERIO? &nbsp; baja → alta</div>
+        ${quad('P')}${quad('E')}${quad('R')}${quad('D')}
+        <div></div><div class="xax"><span>fuera de la frontera de la IA</span><span>¿LA IA RESUELVE BIEN LA TAREA?</span><span>dentro de la frontera</span></div>
+      </div>
+      <div class="nav"><button class="btn ghost" id="back">Volver</button><button class="btn" id="next" ${unplaced.length?'disabled':''}>Ver el mapa de skills</button></div>`;
+    app.querySelectorAll('.chip').forEach(c=>{
+      const i=+c.dataset.t;
+      c.onclick=e=>{ e.stopPropagation(); const zq=c.closest('[data-q]').dataset.q; if(selTask!==null && selTask!==i){ G.place[selTask]=zq; selTask=null; save(); renderGroup(); return; } selTask = selTask===i?null:i; renderGroup(); };
+      c.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); c.click(); } };
+      c.ondragstart=e=>{ e.dataTransfer.setData('text/plain', i); selTask=i; };
+    });
+    app.querySelectorAll('[data-q]').forEach(z=>{
+      const put=i=>{ G.place[i]=z.dataset.q; selTask=null; save(); renderGroup(); };
+      z.onclick=()=>{ if(selTask!==null) put(selTask); };
+      z.ondragover=e=>{ e.preventDefault(); z.classList.add('hot'); };
+      z.ondragleave=()=>z.classList.remove('hot');
+      z.ondrop=e=>{ e.preventDefault(); put(+e.dataTransfer.getData('text/plain')); };
+    });
+    $('#back').onclick=()=>{ G.view='caso'; save(); renderGroup(); };
+    $('#next').onclick=()=>{ G.view='prio'; save(); renderGroup(); };
+  }
+  else if(G.view==='prio'){
+    const sk = role.skills.map((s,i)=>{
+      const linked = role.tasks.map((t,j)=>[t,j]).filter(([t])=>t[3].includes(i));
+      const sel = G.crit.includes(i);
+      return `<button class="skill ${sel?'sel':''}" data-i="${i}"><span class="chk">${sel?'✓':''}</span><span>
+        <span class="nm">${esc(s[0])}</span><span class="gap" title="brecha actual">${[1,2,3].map(n=>`<i class="${n<=s[1]?'on':''}"></i>`).join('')}</span>
+        <div>${linked.length?linked.map(([t,j])=>`<span class="tq ${G.place[j]}">${esc(t[0])} · ${QUADS[G.place[j]].n}</span>`).join(''):'<span class="tiny">Sin tareas asociadas en esta tarjeta</span>'}</div></span></button>`;
+    }).join('');
+    app.innerHTML = stepper(2)+`
+      <p class="kicker">Ronda 2 · 3 minutos</p>
+      <h1>El rol como red de skills: <em>elijan las 3 críticas</em></h1>
+      <p class="hint">Cada skill muestra su brecha actual (● naranja) y las tareas que la movilizan, con el cuadrante que ustedes eligieron.</p>
+      <div class="grid g2">
+        <div class="grid" style="gap:10px">${sk}</div>
+        <div>
+          <div class="card l"><h3>Ruta de adyacencia</h3>
+            <p class="small" style="margin:0">Las skills compartidas con <b>${esc(role.adj)}</b> son una ruta de movilidad interna: ${role.adjS.map(i=>esc(role.skills[i][0])).join(' · ')}.</p></div>
+          <label class="f" for="strat">¿Por qué estas tres? Conéctenlas con la estrategia del banco en una frase</label>
+          <textarea id="strat" maxlength="160" placeholder="Ej.: Sin juicio de riesgo propio, el banco no puede crecer en pymes sin subir la mora.">${esc(G.strategy)}</textarea>
+          <p class="tiny">${G.crit.length}/3 skills elegidas</p>
+        </div>
+      </div>
+      <div class="nav"><button class="btn ghost" id="back">Volver</button><button class="btn" id="next" ${G.crit.length===3?'':'disabled'}>Invertir</button></div>`;
+    app.querySelectorAll('.skill').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.i; if(G.crit.includes(i)) G.crit=G.crit.filter(x=>x!==i); else if(G.crit.length<3) G.crit.push(i);
+      save(); renderGroup(); });
+    $('#strat').oninput=e=>{ G.strategy=e.target.value; save(); };
+    $('#back').onclick=()=>{ G.view='desc'; save(); renderGroup(); };
+    $('#next').onclick=()=>{ G.view='inv'; save(); renderGroup(); };
+  }
+  else if(G.view==='inv'){
+    const pts = G.cards.reduce((a,k)=>a+CARDS.find(c=>c.k===k).pts,0);
+    const hrs = G.cards.reduce((a,k)=>a+CARDS.find(c=>c.k===k).h,0);
+    app.innerHTML = stepper(3)+`
+      <p class="kicker">Ronda 3 · 7 minutos</p>
+      <h1>Armen la cartera: <em>${BUDGET} puntos y ${HOURS} horas por persona</em></h1>
+      <div class="grid g2" style="grid-template-columns:2fr 1fr;align-items:start">
+        <div>
+          <div class="grid g2" style="margin-bottom:16px">
+            <div><div class="small"><b>Presupuesto</b> · ${pts} de ${BUDGET} puntos</div><div class="meter"><i style="width:${Math.min(100,pts/BUDGET*100)}%"></i></div></div>
+            <div><div class="small"><b>Tiempo</b> · ${hrs} de ${HOURS} horas por persona</div><div class="meter"><i style="width:${Math.min(100,hrs/HOURS*100)}%"></i></div></div>
+          </div>
+          <div class="grid g2">${CARDS.map(c=>{ const sel=G.cards.includes(c.k); const can = sel || (pts+c.pts<=BUDGET && hrs+c.h<=HOURS);
+            return `<button class="xcard ${sel?'sel':''}" data-k="${c.k}" ${can?'':'disabled style="opacity:.45;cursor:not-allowed"'}><h3>${esc(c.n)}</h3><span class="cost"><b>${c.pts} puntos</b> · ${c.h} h por persona</span>${sel?'<span class="pill">En la cartera</span>':''}</button>`; }).join('')}</div>
+          <p class="tiny" style="margin-top:10px">Las cartas que no entran en el presupuesto o en las horas quedan deshabilitadas.</p>
+        </div>
+        <div class="copilot">
+          <h3><span class="dot"></span>Copiloto de Talento</h3>
+          <div class="txt" id="copTxt">${G.copShown?COPTEXT(role):'Analizo el rol y les propongo una cartera.'}</div>
+          ${G.copShown?'<div class="conf">Confianza: 94 %</div>':''}
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+            ${G.copShown?'<button class="btn sm" id="apply">Aplicar recomendación</button>':'<button class="btn sm" id="ask">Pedir recomendación</button>'}
+          </div>
+        </div>
+      </div>
+      <div class="nav"><button class="btn ghost" id="back">Volver</button><button class="btn" id="next" ${G.cards.length?'':'disabled'}>Medir</button></div>`;
+    app.querySelectorAll('.xcard').forEach(b=>b.onclick=()=>{ const k=b.dataset.k;
+      G.cards = G.cards.includes(k)?G.cards.filter(x=>x!==k):[...G.cards,k]; save(); renderGroup(); });
+    if($('#ask')) $('#ask').onclick=()=>typeCopilot(role);
+    if($('#apply')) $('#apply').onclick=()=>{ G.cards=[...REC.cards]; G.meas=[...REC.meas]; G.copApplied=true; save(); renderGroup(); };
+    $('#back').onclick=()=>{ G.view='prio'; save(); renderGroup(); };
+    $('#next').onclick=()=>{ G.view='med'; save(); renderGroup(); };
+  }
+  else if(G.view==='med'){
+    app.innerHTML = stepper(4)+`
+      <p class="kicker">Ronda 4 · 3 minutos</p>
+      <h1>¿Cómo sabrían que funcionó? <em>Elijan 2 evidencias</em></h1>
+      <p class="hint">Cada evidencia mira un eslabón de la teoría de cambio que vieron en la clase de MEL.</p>
+      <div class="chain"><span>Experiencia</span><b>→</b><span>Aprendizaje</span><b>→</b><span>Aplicación</span><b>→</b><span>Resultado</span></div>
+      <div class="grid g2">${MEASURES.map(m=>{ const sel=G.meas.includes(m.k); return `<button class="skill ${sel?'sel':''}" data-k="${m.k}"><span class="chk">${sel?'✓':''}</span><span><span class="nm">${esc(m.n)}</span><div><span class="tq">Eslabón: ${m.link}</span></div></span></button>`; }).join('')}</div>
+      <p class="tiny">${G.meas.length}/2 evidencias elegidas</p>
+      <div class="nav"><button class="btn ghost" id="back">Volver</button><button class="btn" id="next" ${G.meas.length===2?'':'disabled'}>Ver el resultado</button></div>`;
+    app.querySelectorAll('.skill').forEach(b=>b.onclick=()=>{ const k=b.dataset.k;
+      if(G.meas.includes(k)) G.meas=G.meas.filter(x=>x!==k); else if(G.meas.length<2) G.meas.push(k); save(); renderGroup(); });
+    $('#back').onclick=()=>{ G.view='inv'; save(); renderGroup(); };
+    $('#next').onclick=()=>{ G.view='res'; if(!G.ts) G.ts=Date.now(); save(); renderGroup(); };
+  }
+  else if(G.view==='res'){
+    const sc = score(G); const cop = copilotDecision(G);
+    const sub = {sala:G.sala, grupo:G.grupo, place:G.place, crit:G.crit, cards:G.cards, meas:G.meas, cop, strategy:G.strategy, ts:G.ts, refl:(G.refl||['','',''])};
+    const code = encode(sub);
+    const lvl=v=>v>=67?'alto':v>=40?'medio':'bajo';
+    const head = sc.perf-sc.cap>=15 ? 'Su cartera rinde hoy más de lo que construye para mañana.'
+               : sc.cap-sc.perf>=10 ? 'Su cartera construye capacidad, aunque el desempeño inmediato crece más despacio.'
+               : 'Su cartera equilibra el desempeño de hoy con la capacidad de mañana.';
+    const row=(lab,desc,v,c)=>`<div class="ind"><div><div class="il">${lab} <span class="lv">${lvl(v)}</span></div><div class="id">${desc}</div></div>
+      <div class="bar2"><span class="t"><i style="width:${v}%;background:${c}"></i></span><span class="v">${v}<small>/100</small></span></div></div>`;
+    const R = G.refl || (G.refl=['','','']);
+    app.innerHTML = stepper(5)+`
+      <p class="kicker">Revelación</p>
+      <h1>Dos años después: <em>¿qué capacidad instalaron?</em></h1>
+      <div class="event" style="margin:16px 0 20px"><p class="kicker">Evento</p><div style="font-size:18px;font-weight:700">${EVENT}</div></div>
+      <div class="card">
+        <h2 style="margin-bottom:2px">${head}</h2>
+        <p class="small muted" style="margin:0 0 6px">Cada indicador va de 0 a 100. Lo interesante no es el número, sino la distancia entre desempeño y capacidad.</p>
+        ${row('Desempeño a 3 meses','Qué tan bien rinde el equipo ahora, con la IA disponible.',sc.perf,'var(--orange)')}
+        ${row('Capacidad a 12 meses','Qué puede hacer el equipo por sí mismo, en situaciones nuevas.',sc.cap,'var(--violet)')}
+        ${row('Resiliencia ante el evento','Cómo responde cuando la IA falla y llegan casos atípicos.',sc.res,'#14121F')}
+        ${row('Visibilidad de sus evidencias','Si lo que eligieron medir les permitiría ver la diferencia entre desempeño y capacidad.',sc.vis,'#9B9A97')}
+        <p class="tiny" style="margin:10px 0 0">Es un modelo didáctico simplificado, hecho para discutirlo en el plenario, no para elegir un ganador.</p>
+      </div>
+      <div class="card l" style="margin-top:16px"><h3>Por qué les dio así</h3><ul class="ins small">${sc.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>
+      <div class="card" style="margin-top:16px">
+        <h2>Reflexión del equipo</h2>
+        <p class="small muted" style="margin:0">Escriban juntos. Lo van a leer en el plenario.</p>
+        <label class="f" for="r0">¿Qué tarea les costó más ubicar y por qué?</label>
+        <textarea id="r0" maxlength="200" data-r="0">${esc(R[0])}</textarea>
+        <label class="f" for="r1">¿Qué hicieron con la recomendación del Copiloto y por qué?</label>
+        <textarea id="r1" maxlength="200" data-r="1">${esc(R[1])}</textarea>
+        <label class="f" for="r2">Si tuvieran que defender su cartera en una frase, ¿cuál sería?</label>
+        <textarea id="r2" maxlength="200" data-r="2">${esc(R[2])}</textarea>
+      </div>
+      <div class="card p" style="margin-top:16px">
+        <h2>Guardar</h2>
+        <div id="sendState" class="small" style="margin-bottom:10px">${G.sent?'<span class="ok">Guardado en el tablero docente.</span>':''}</div>
+        <p class="small" style="margin:0 0 6px">Si no ven la confirmación, copien este código y péguenlo en el chat de Zoom:</p>
+        <div class="code" id="code">${code}</div>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn" id="send">${G.sent?'Guardar de nuevo':'Guardar'}</button>
+          <button class="btn ghost" id="copy">Copiar código</button>
+        </div>
+      </div>
+      <div class="nav"><button class="btn ghost" id="back">Volver a medir</button><button class="btn ghost" id="reset">Empezar de nuevo</button></div>`;
+    app.querySelectorAll('textarea[data-r]').forEach(t=>t.oninput=()=>{ G.refl[+t.dataset.r]=t.value; G.sent=false; save();
+      const sub2={...sub, refl:G.refl}; $('#code').textContent=encode(sub2); $('#sendState').innerHTML=''; $('#send').textContent='Guardar'; });
+    $('#copy').onclick=async()=>{ try{ await navigator.clipboard.writeText($('#code').textContent); $('#copy').textContent='Copiado'; }catch(e){ $('#copy').textContent='Seleccioná el código y copialo'; } };
+    $('#send').onclick=async()=>{
+      const st=$('#sendState'); st.textContent='Guardando…';
+      const id='s'+G.sala+'-'+G.ts;
+      if(CONFIG.endpoint){
+        try{ const r = await fetch(CONFIG.endpoint,{method:'POST', body:JSON.stringify({action:'save', clase:CONFIG.clase, ...sub, refl:G.refl, id, v:2})});
+             const j = await r.json(); if(!j.ok) throw new Error(j.error||'error');
+             G.sent=true; save(); st.innerHTML='<span class="ok">Guardado en el tablero docente.</span>'; $('#send').textContent='Guardar de nuevo'; }
+        catch(e){ st.innerHTML='No se pudo guardar. Revisen la conexión o peguen el código en el chat de Zoom.'; }
+        return;
+      }
+      if(!DB){ st.innerHTML='El guardado directo no está disponible en esta vista. Peguen el código en el chat de Zoom.'; return; }
+      try{ await DB.doc('envios/'+id).set({...sub, refl:G.refl, id, v:2});
+           G.sent=true; save(); st.innerHTML='<span class="ok">Guardado en el tablero docente.</span>'; $('#send').textContent='Guardar de nuevo'; }
+      catch(e){ st.innerHTML='No se pudo guardar directamente. Peguen el código en el chat de Zoom.'; }
+    };
+    $('#back').onclick=()=>{ G.view='med'; save(); renderGroup(); };
+    $('#reset').onclick=()=>{ if($('#reset').dataset.c){ G=fresh(); save(); renderGroup(); } else { $('#reset').dataset.c='1'; $('#reset').textContent='Tocá de nuevo para borrar todo'; } };
+  }
+  groupTimer();
+}
+function COPTEXT(role){
+  return `Para el rol de ${role.rol}, la combinación de mayor retorno es: Copiloto de IA libre en el puesto + Curso e-learning con certificado + Comunidad de práctica.\n\nEs la opción de menor costo (30 puntos, 12 horas por persona) y la que antes mejora la productividad del equipo.\n\nPara medir, sugiero porcentaje de finalización y satisfacción: son indicadores simples, comparables y fáciles de reportar a la dirección.`;
+}
+function typeCopilot(role){
+  const el=$('#copTxt'); const full=COPTEXT(role); let i=0; $('#ask').disabled=true;
+  el.textContent='';
+  const tick=()=>{ i+=4; el.textContent=full.slice(0,i); if(i<full.length) setTimeout(tick,18); else { G.copShown=true; save(); renderGroup(); } };
+  tick();
+}
+
+/* ======================= VISTA DOCENTE ======================= */
+let D = load('c28-doc', {show:false, debrief:false, pasted:[], tStart:0, tAcc:0, running:false});
+let remote = {}; let unsub=null; let dbState='';
+function saveD(){ store('c28-doc', D); }
+let poll=null;
+async function pullSheet(){
+  try{ const r = await fetch(CONFIG.endpoint+'?action=list&clase='+encodeURIComponent(CONFIG.clase)+'&t='+Date.now());
+       const j = await r.json(); if(!j.ok) throw new Error(j.error||'error');
+       remote={}; (j.rows||[]).forEach(x=>{ if(x && x.sala && Array.isArray(x.place) && x.place.length===8) remote[x.id]={...x}; });
+       dbState='Tablero en vivo (Google Sheets). Se actualiza cada 5 segundos.';
+  }catch(e){ dbState='No se pudo leer la planilla. Pueden usar los códigos del chat.'; }
+  if(route()==='docente') renderDoc();
+}
+function subscribe(){
+  if(CONFIG.endpoint){ if(!poll){ dbState='Conectando con la planilla…'; pullSheet(); poll=setInterval(()=>{ if(route()==='docente') pullSheet(); },5000); } return; }
+  if(!DB || unsub) return;
+  dbState='Conectando con el tablero compartido…';
+  const timer=setTimeout(()=>{ dbState='El tablero compartido no responde todavía. Pueden usar los códigos del chat.'; if(route()==='docente') renderDoc(); },10000);
+  try{
+    unsub = DB.collection('envios').onSnapshot(snap=>{
+      clearTimeout(timer); remote={};
+      snap.docs.forEach(d=>{ const x=d.data(); if(x && x.sala && Array.isArray(x.place) && x.place.length===8) remote[d.id]={...x, id:d.id}; });
+      dbState = snap.metadata.fromCache ? 'Mostrando datos guardados; se actualizan solos.' : 'Tablero compartido en vivo.';
+      if(route()==='docente') renderDoc();
+    }, err=>{ clearTimeout(timer); dbState='El tablero compartido no está disponible. Usen los códigos del chat.'; if(route()==='docente') renderDoc(); });
+  }catch(e){ dbState='El tablero compartido no está disponible. Usen los códigos del chat.'; }
+}
+function allSubs(){
+  const m={}; D.pasted.forEach(s=>m[s.id]=s); Object.values(remote).forEach(s=>m[s.id]=s);
+  return Object.values(m).sort((a,b)=>a.sala-b.sala || a.ts-b.ts);
+}
+function docElapsed(){ return D.tAcc + (D.running ? (Date.now()-D.tStart) : 0); }
+function docTimer(){
+  if(route()!=='docente') return;
+  const el=$('#dTimer'); if(!el) return;
+  const left = 22*60 - docElapsed()/1000; const m = docElapsed()/60000;
+  const r = ROUNDS.find(x=>m>=x[0]&&m<x[1]);
+  el.innerHTML = `<div class="big">${fmt(left)}</div><div class="small muted">${left<=0?'Tiempo cumplido':r?'Ahora: '+r[2]+' (min '+r[0]+'–'+r[1]+')':''}</div>`;
+}
+setInterval(docTimer,1000);
+
+function chartSVG(subs){
+  if(!subs.length) return '';
+  const W=900, H=230, pad=40, n=subs.length, gw=(W-pad*2)/n, bw=Math.min(26,(gw-16)/3);
+  const cols=['#DCA456','#5743CB','#14121F'];
+  let s=`<svg viewBox="0 0 ${W} ${H+40}" width="100%" role="img" aria-label="Desempeño, capacidad y resiliencia por grupo">`;
+  [0,50,100].forEach(v=>{ const y=H-v/100*(H-20); s+=`<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#E4E3EA"/><text x="${pad-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#6E6D6A">${v}</text>`; });
+  subs.forEach((x,i)=>{ const sc=score(x); const cx=pad+gw*i+gw/2;
+    [sc.perf,sc.cap,sc.res].forEach((v,j)=>{ const h=v/100*(H-20); const bx=cx-1.5*bw+j*bw;
+      s+=`<rect x="${bx}" y="${H-h}" width="${bw-3}" height="${h}" rx="3" fill="${cols[j]}"/><text x="${bx+(bw-3)/2}" y="${H-h-4}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#111">${v}</text>`; });
+    s+=`<text x="${cx}" y="${H+16}" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Sala ${x.sala}</text><text x="${cx}" y="${H+31}" text-anchor="middle" font-size="10.5" fill="#6E6D6A">${esc((x.grupo||ROLES[x.sala-1].rol).slice(0,22))}</text>`; });
+  return s+'</svg>';
+}
+
+function renderDoc(){
+  const subs = allSubs(); const app=$('#app');
+  const groupCard = x=>{
+    const role=ROLES[x.sala-1]; const sc=score(x);
+    const cnt=q=>x.place.filter(p=>p===q).length;
+    const copTag = {aceptada:'o',modificada:'',rechazada:'v'}[x.cop];
+    return `<div class="gcard">
+      <div class="small muted">Sala ${x.sala}${x.grupo?' · '+esc(x.grupo):''}</div>
+      <h3>${esc(role.rol)}</h3>
+      <div class="mini"><div style="background:var(--peach)">Proteger ${cnt('P')}</div><div style="background:var(--lilac)">Entrenar ${cnt('E')}</div><div style="background:var(--card)">Rediseñar ${cnt('R')}</div><div style="background:var(--card)">Delegar ${cnt('D')}</div></div>
+      <div class="small"><b>Skills críticas:</b> ${x.crit.map(i=>esc(role.skills[i][0])).join(' · ')}</div>
+      ${x.strategy?`<div class="small muted" style="margin-top:4px"><i>«${esc(x.strategy)}»</i></div>`:''}
+      <div style="margin-top:8px">${x.cards.map(k=>`<span class="tag v">${esc(CARDS.find(c=>c.k===k).n)}</span>`).join('')}</div>
+      <div style="margin-top:4px">${x.meas.map(k=>`<span class="tag">${esc(MEASURES.find(m=>m.k===k).n)}</span>`).join('')}</div>
+      <div style="margin-top:8px" class="small">Copiloto: <span class="tag ${copTag}">${x.cop}</span></div>
+      ${(x.refl||[]).some(r=>r)?`<div class="small" style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px"><b>Reflexión</b>${['Tarea difícil','Copiloto','Defensa'].map((l,j)=>x.refl[j]?`<div style="margin-top:3px"><span class="muted">${l}:</span> ${esc(x.refl[j])}</div>`:'').join('')}</div>`:''}
+      ${D.show?`<div class="small" style="margin-top:8px">Desempeño <b>${sc.perf}</b> · Capacidad <b>${sc.cap}</b> · Resiliencia <b>${sc.res}</b> · Visibilidad <b>${sc.vis}</b></div>`:''}
+    </div>`;
+  };
+  const copStats = ['aceptada','modificada','rechazada'].map(k=>[k,subs.filter(s=>s.cop===k).length]);
+  app.innerHTML = `
+    <p class="kicker">Vista docente</p>
+    <h1>Tablero del plenario: <em>Capacidad 2028</em></h1>
+    <div class="grid g2" style="grid-template-columns:1fr 2fr;margin:14px 0 18px;align-items:start">
+      <div class="card"><div class="small muted">Tiempo en salas (22 min)</div><div id="dTimer"></div>
+        <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" id="tGo">${D.running?'Pausar':'Iniciar'}</button><button class="btn sm ghost" id="tReset">Reiniciar</button></div>
+        <div class="tiny" style="margin-top:8px">Avisos en el chat: minutos 2, 7, 10, 17 y 20.</div></div>
+      <div class="card">
+        <div class="toolbar">
+          <button class="switch ${D.show?'on':''}" id="swShow"><span class="k"></span>Mostrar puntajes</button>
+          <button class="switch ${D.debrief?'on':''}" id="swDeb"><span class="k"></span>Modo debrief</button>
+          <span class="small muted">${subs.length} ${subs.length===1?'grupo':'grupos'} · ${esc(dbState||((DB||CONFIG.endpoint)?'':'Guardado directo no disponible en esta vista: usen los códigos del chat.'))}</span>
+        </div>
+        <label class="f" for="paste">Pegar códigos del chat (uno o varios)</label>
+        <textarea id="paste" placeholder="C28-..."></textarea>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px"><button class="btn sm" id="addCodes">Agregar al tablero</button><span id="pasteMsg" class="small"></span>
+        ${D.pasted.length?'<button class="btn sm ghost" id="clearP" style="margin-left:auto">Borrar códigos pegados</button>':''}</div>
+      </div>
+    </div>
+    ${subs.length?`
+      ${D.show?`<div class="card" style="margin-bottom:18px"><h2>Desempeño, capacidad y resiliencia por grupo</h2>
+        <div class="legend"><span><i style="background:#DCA456"></i>Desempeño a 3 meses</span><span><i style="background:#5743CB"></i>Capacidad a 12 meses</span><span><i style="background:#14121F"></i>Resiliencia ante el evento</span></div>${chartSVG(subs)}</div>`:''}
+      <div class="card l" style="margin-bottom:18px"><b>Copiloto:</b> ${copStats.map(([k,n])=>`${n} ${k}${n===1?'':'s'}`).join(' · ')}</div>
+      <div class="grid g3">${subs.map(groupCard).join('')}</div>`
+    :`<div class="notice">Todavía no hay grupos. Cuando guarden, aparecen acá; si no, peguen sus códigos del chat.</div>`}
+    ${D.debrief?debriefHTML():''}`;
+  docTimer();
+  $('#tGo').onclick=()=>{ if(D.running){ D.tAcc+=Date.now()-D.tStart; D.running=false; } else { D.tStart=Date.now(); D.running=true; } saveD(); renderDoc(); };
+  $('#tReset').onclick=()=>{ D.tAcc=0; D.running=false; saveD(); renderDoc(); };
+  $('#swShow').onclick=()=>{ D.show=!D.show; saveD(); renderDoc(); };
+  $('#swDeb').onclick=()=>{ D.debrief=!D.debrief; saveD(); renderDoc(); };
+  $('#addCodes').onclick=()=>{
+    const codes=($('#paste').value.match(/C28-[A-Za-z0-9+/=]+/g)||[]); let ok=0, bad=0;
+    codes.forEach(c=>{ try{ const s=decode(c); D.pasted=D.pasted.filter(x=>x.id!==s.id); D.pasted.push(s); ok++; }catch(e){ bad++; } });
+    saveD(); renderDoc();
+    $('#pasteMsg').innerHTML = codes.length? `<span class="ok">${ok} agregado${ok===1?'':'s'}</span>${bad?` · ${bad} con error`:''}` : 'No encontré códigos que empiecen con C28-.';
+  };
+  if($('#clearP')) $('#clearP').onclick=()=>{ D.pasted=[]; saveD(); renderDoc(); };
+}
+function debriefHTML(){
+  return `<div style="margin-top:26px">
+    <p class="kicker">Modo debrief</p>
+    <h1>Lo que el simulador <em>no les mostró</em></h1>
+    <div class="grid g2" style="margin-top:14px;align-items:start">
+      <div class="card p"><h2>El Copiloto estaba guionado</h2>
+        <p class="small">Recomendaba siempre lo mismo: copiloto libre, e-learning y comunidad; medir finalización y satisfacción. Es la cartera más barata y la que más sube el desempeño a tres meses. Sonaba seguro (94 %). Optimizaba el corto plazo.</p>
+        <p class="small" style="margin:0">Es la vivencia de dos hallazgos: con IA confiamos más y verificamos menos (Lee et al., 2025; Fernandes et al., 2026), y la IA ayuda dentro de su frontera y perjudica fuera (Dell’Acqua et al., 2026).</p></div>
+      <div class="card"><h2>Cómo calcula el modelo</h2>
+        <ul class="ins small">
+          <li>Delegar una tarea que forma criterio sube el desempeño y baja capacidad y resiliencia.</li>
+          <li>Delegar una tarea fuera de la frontera de la IA baja la resiliencia.</li>
+          <li>Proteger tareas sin ninguna carta de práctica (mentoría, simulador, proyecto o microcasos) castiga la resiliencia.</li>
+          <li>Entrenar con IA sin tutor ni simulador baja la capacidad. Y el copiloto libre sin tutor ni simulador funciona como muleta: resta capacidad.</li>
+          <li>Elegir las skills con más brecha y más tareas formativas suma capacidad.</li>
+          <li>La visibilidad suma el valor de las dos evidencias: finalización y satisfacción valen 0; desempeño sin IA y tasa de error en casos complejos valen 3.</li>
+        </ul>
+        <p class="tiny" style="margin:0">Modelo didáctico de la clase basado en Bastani et al. (2025), Kestin et al. (2025), Shen y Tamkin (2026). Es una simplificación para discutir.</p></div>
+    </div>
+    <div class="card" style="margin-top:16px"><h2>Qué activaba cada carta</h2>
+      <table class="at"><thead><tr><th>Carta</th><th>Puntos</th><th>Horas</th><th>Desempeño</th><th>Capacidad</th><th>Resiliencia</th><th>Qué activa</th></tr></thead>
+      <tbody>${CARDS.map(c=>`<tr><td><b>${esc(c.n)}</b></td><td>${c.pts}</td><td>${c.h}</td><td>${c.perf>0?'+':''}${c.perf}</td><td>${c.cap>0?'+':''}${c.cap}</td><td>${c.res>0?'+':''}${c.res}</td><td>${esc(c.act)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="card l" style="margin-top:16px"><h2>Preguntas para la pecera</h2>
+      <ol class="small" style="margin:0;padding-left:20px">
+        <li>¿Qué cartera maximizó el desempeño y cuál la capacidad? ¿Por qué no coinciden?</li>
+        <li>¿Quién aceptó al Copiloto? ¿Qué tan seguro sonaba, y qué tan seguros estaban ustedes?</li>
+        <li>¿Sus evidencias habrían detectado la diferencia entre desempeño y capacidad?</li>
+        <li>¿Dónde va a ganar criterio quien entra hoy a ese rol?</li>
+        <li>¿Qué tarea de tu organización se está delegando y habría que proteger?</li>
+        <li>¿Qué supuesto del simulador no comparten?</li>
+      </ol></div>
+  </div>`;
+}
+
+/* ======================= RUTEO ======================= */
+function route(){ return location.hash==='#docente' ? 'docente' : 'grupo'; }
+function render(){
+  const r=route();
+  $('#toDoc').classList.toggle('hidden', r==='docente');
+  $('#toGroup').classList.toggle('hidden', r!=='docente');
+  if(r==='docente'){ subscribe(); renderDoc(); } else renderGroup();
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>
